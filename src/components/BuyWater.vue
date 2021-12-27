@@ -67,7 +67,7 @@ export default {
       logs: ['"messages" :'],
       timer: null,
       gCode: 0,
-      dialogVisible: true,
+      dialogVisible: false,
     }
   },
   methods: {
