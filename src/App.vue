@@ -30,7 +30,7 @@ export default {
   },
   data() {
     return {
-      address: '0x7A32007EcE5d5Af6928488096f3B26F36562E16E',
+      address: '',
       token: '',
     }
   },

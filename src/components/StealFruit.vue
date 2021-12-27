@@ -1,20 +1,30 @@
 <template>
   <el-card>
     <template #header>
-      <div>
+      <div class="card-header">
         <span>Steal Fruit</span>
+        <el-button type="text" @click="outputWorkTime">Output</el-button>
       </div>
     </template>
-    <el-row :gutter="10">
+    <el-row :gutter="10" class="form">
       <el-col :span="16">
         <el-select v-model="landValue" placeholder="选择土地类型">
-          <el-option label="黑土地" value="黑土地"></el-option>
-          <el-option label="红土地" value="红土地"></el-option>
-          <el-option label="黄土地" value="黄土地"></el-option>
+          <el-option label="黑土地" value="3"></el-option>
+          <el-option label="红土地" value="2"></el-option>
+          <el-option label="黄土地" value="1"></el-option>
         </el-select>
       </el-col>
       <el-col :span="8">
-        <el-button @click="stealByUsersId">Start steal</el-button>
+        <el-button @click="stealByUserId">Start steal</el-button>
+      </el-col>
+    </el-row>
+
+    <el-row class="form" :gutter="10" style="margin-top: 10px">
+      <el-col :span="16">
+        <el-input-number v-model="customId" :min="1" controls-position="right"></el-input-number>
+      </el-col>
+      <el-col :span="8">
+        <el-button @click="stealByCostomId">Steal by id</el-button>
       </el-col>
     </el-row>
     
@@ -34,82 +44,67 @@ export default {
   ],
   data() {
     return {
-      landValue: '黑土地',
-      logs: ['"messages" :']
+      landValue: '3',
+      logs: ['"messages" :'],
+      customId: 1,
     }
   },
   methods: {
-    startSteal: function(id) {//根据id查询岛屿是否有果实可以偷取，id：岛屿主id
-      let level = 3;//默认偷取黑土地
-      switch (this.landValue) {
-        case '黑土地':
-          level = 3;
-          break;
-        case '红土地':
-          level = 2;
-          break;
-        case '黄土地':
-          level = 1;
-          break;
-      }
-      axios.get(`https://gas.mtvs.tv/api/app/member/factory?memberId=${id}`, {
-        headers: {
-          'token': this.token,
-        }
-      }).then(res => {
-        if (res.data.code != 200) {
-          let msg = 'Token已过期！';
-          console.warn(msg);
-          this.pushMessage(msg);
-          return;
-        }
-        let data = res.data.data;
-        if (data) {
-          if (data.length == 0) {
-            console.log('Island is empty');
+    stealByCostomId: function() {//根据自定义ID偷取
+      this.getIslandByUserId(this.customId, landList => {
+        for (let j = 0; j < landList.length; j++) {
+          if (landList[j].status == 'pick') {
+            if (landList[j].factoryId == this.landValue) {
+              let msg = `${this.customId}号岛屿的第${j+1}块地有${landList[j].stolenNum}个果实可偷取。`;
+              console.log(msg);
+              this.pushMessage(msg);
+              this.steal(landList[j].id);//偷取果实
+            }
           } else {
-            for (let j = 0; j < data.length; j++) {
-              // if (data[j].factoryId == level) {//打印 worktime
-              //   console.log(new Date(data[j].workTime));
-              // }
-              if (data[j].status && data[j].status == 'pick') {
-                if(data[j].factoryId == level){//设置土地等级
-                  let msg = `${id}号岛屿的第${j+1}块地有${data[j].stolenNum}个果实可偷取。`
+            console.log('果实未成熟。')
+          }
+        }
+      });
+    },
+
+    stealByUserId: function() {//根据好友列表ID偷取
+      this.getUserList(userList => {
+        for (let i = 0; i < userList.length; i++) {
+          let id = userList[i].id;
+          this.getIslandByUserId(id, landList => {
+            for (let j = 0; j < landList.length; j++) {
+              if (landList[j].status == 'pick') {
+                if (landList[j].factoryId == this.landValue) {
+                  let msg = `${id}号岛屿的第${j+1}块地有${landList[j].stolenNum}个果实可偷取。`;
                   console.log(msg);
                   this.pushMessage(msg);
-                  //偷取果实
-                  this.steal(data[j].id);
+                  this.steal(landList[j].id);//偷取果实
                 }
               } else {
-                console.log('果实未成熟或无法偷取。')
+                console.log('果实未成熟。')
               }
             }
-          }
-        } else {
-          console.log('Island is not found!');
+          });
         }
-      })
+      });
     },
 
-    steal: function(id) {//偷取果实，id：土地id
-      axios.post(`https://gas.mtvs.tv/api/app/record/factory/steal?memberFactoryId=${id}`,{},{
-          headers: {
-            'token': this.token,
-          }
-        }).then(res => {
-          if (res.data.code == 200){
-            let temData = Math.floor(res.data.data * 100) / 100;
-            let msg = `你成功盗取了${temData}个果实`;
-            console.log(msg);
-            this.pushMessage(msg);
-          } else {
-            console.log(res.data.msg);
-            this.pushMessage(res.data.msg);
-          }
-        });
+    outputWorkTime: function() {//打印土地worktime
+      this.getUserList(userList => {
+        for (let i = 0; i < userList.length; i++) {
+          let id = userList[i].id;
+          this.getIslandByUserId(id, landList => {
+            for (let j = 0; j < landList.length; j++) {
+              if (landList[j].factoryId == this.landValue) {
+                console.log(`${landList[j].memberId}>${new Date(landList[j].workTime)}`);
+              }
+            }
+          });
+        }
+      });
     },
 
-    stealByUsersId: function() {//根据好友列表ID偷取
+    getUserList: function(callback) {//获取用户列表
       axios.get(`https://gas.mtvs.tv/api/app/member/friend?size=1&page=0`, {
         headers: {
           'token': this.token,
@@ -128,25 +123,75 @@ export default {
           }
         }).then(res => {
           let idList = res.data.data.content;
-          for (let i = 0; i < idList.length; i++) {
-            let id = idList[i].id;
-            this.startSteal(id);
-          }
+          callback(idList);
         });
       });
     },
 
-    pushMessage: function(msg) {
+    getIslandByUserId: function(id, callback) {//根据用户ID获取岛屿信息
+      axios.get(`https://gas.mtvs.tv/api/app/member/factory?memberId=${id}`, {
+        headers: {
+          'token': this.token,
+        }
+      }).then(res => {
+        if (res.data.code != 200) {
+          let msg = 'Token已过期！';
+          console.warn(msg);
+          this.pushMessage(msg);
+          return;
+        }
+        let data = res.data.data;
+        if (data) {
+          if (data.length == 0) {
+            console.log('Island is empty');
+          } else {
+            callback(data);
+          }
+        } else {
+          console.log('Island is not found!');
+        }
+      });
+    },
+
+    steal: function(id) {//根据土地ID偷取果实
+      axios.post(`https://gas.mtvs.tv/api/app/record/factory/steal?memberFactoryId=${id}`,{},{
+          headers: {
+            'token': this.token,
+          }
+        }).then(res => {
+          if (res.data.code == 200){
+            let temData = Math.floor(res.data.data * 100) / 100;
+            let msg = `你成功盗取了${temData}个果实`;
+            console.log(msg);
+            this.pushMessage(msg);
+          } else {
+            console.log(res.data.msg);
+            this.pushMessage(res.data.msg);
+          }
+        });
+    },
+
+    pushMessage: function(msg) {//显示消息
       this.logs.push(msg);
       this.$refs.logs.scrollTop = this.$refs.logs.scrollHeight;
     },
-
   }
 }
 </script>
 
 <style scoped>
-.el-select, .el-button {
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header > .el-button {
+  padding: 0;
+  min-height: 0;
+}
+
+.form > .el-col > * {
    width: 100%;
 }
 
