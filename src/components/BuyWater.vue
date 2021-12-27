@@ -102,9 +102,9 @@ export default {
         headers: {
           'token': this.token,
         }
-      }).then(ref => {
-        console.log(ref);
-        this.pushMessage(ref);
+      }).then(res => {
+        console.log(res);
+        this.pushMessage(res.data.data.msg);
       })
     },
 
@@ -123,8 +123,8 @@ export default {
     pushMessage: function(msg) {
       this.logs.push(msg);
       this.$refs.logs.scrollTop = this.$refs.logs.scrollHeight;
-    }
-  }
+    },
+  },
 }
 </script>
 

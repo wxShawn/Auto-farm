@@ -1,6 +1,14 @@
 <template>
-  <span>Token</span>
-  <el-input style="margin-bottom: 16px" v-model="token" placeholder="Set login token" />
+  <el-row :gutter="16" class="login">
+    <el-col :span="22">
+      <el-input style="margin-bottom: 16px" v-model="address" placeholder="Set your address" />
+    </el-col>
+    <el-col :span="2">
+      <el-button type="primary" @click="login">Login</el-button>
+    </el-col>
+  </el-row>
+  <p class="token">{{ `current token: ${token}` }}</p>
+  
   <el-row :gutter="16">
     <el-col :span="8"><steal-fruit :token="token"/></el-col>
     <el-col :span="8"><buy-water :token="token"/></el-col>
@@ -9,8 +17,10 @@
 </template>
 
 <script>
+import axios from 'axios'
 import StealFruit from './components/StealFruit.vue'
 import BuyWater from './components/BuyWater.vue'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'App',
@@ -20,9 +30,40 @@ export default {
   },
   data() {
     return {
+      address: '0x7A32007EcE5d5Af6928488096f3B26F36562E16E',
       token: '',
     }
-  }
+  },
+  methods: {
+    login: function() {//获取token
+      if (this.address.length != 42) {
+        console.log('地址格式不正确');
+        ElMessage({
+          message: '地址格式不正确',
+          type: 'error',
+        });
+        return;
+      }
+      axios.post(`https://gas.mtvs.tv/api/app/member/login?account=${this.address}&inviteCode=`)
+        .then(res => {
+          if (res.data.code == 200) {
+            this.token = res.data.data;
+            console.log('Login success.');
+            ElMessage({
+              message: 'Login success.',
+              type: 'success',
+            });
+          } else {
+            console.log(res.data);
+            ElMessage('Login failed!');
+            ElMessage({
+              message: 'Login failed!',
+              type: 'error',
+            });
+          }
+        });
+    }
+  },
 }
 </script>
 
@@ -51,5 +92,14 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   padding: 16px;
+}
+
+.login .el-input, .login .el-button {
+  width: 100%;
+}
+
+.token {
+  font-size: 12px;
+  color: #aaa;
 }
 </style>

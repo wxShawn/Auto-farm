@@ -69,6 +69,9 @@ export default {
             console.log('Island is empty');
           } else {
             for (let j = 0; j < data.length; j++) {
+              // if (data[j].factoryId == level) {//打印 worktime
+              //   console.log(new Date(data[j].workTime));
+              // }
               if (data[j].status && data[j].status == 'pick') {
                 if(data[j].factoryId == level){//设置土地等级
                   let msg = `${id}号岛屿的第${j+1}块地有${data[j].stolenNum}个果实可偷取。`
@@ -136,7 +139,8 @@ export default {
     pushMessage: function(msg) {
       this.logs.push(msg);
       this.$refs.logs.scrollTop = this.$refs.logs.scrollHeight;
-    }
+    },
+
   }
 }
 </script>
