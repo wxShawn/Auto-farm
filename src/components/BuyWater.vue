@@ -13,14 +13,6 @@
           controls-position="right"
         />
       </el-col>
-      <!-- <el-col :span="8">
-        <el-input-number
-          v-model="second"
-          :min="3"
-          :max="60"
-          controls-position="right"
-        />
-      </el-col> -->
       <el-col :span="8">
         <el-button @click="listenWaterStore">Listen</el-button>
       </el-col>
@@ -31,7 +23,7 @@
       <p style="margin-bottom: 12px">{{ `Total: ${logs.length - 1}` }}</p>
     </div>
 
-    <audio ref="music" src="https://www.xzmp3.com/down/9d46373bbcfc.mp3"></audio>
+    <audio ref="music" src="https://webfs.ali.kugou.com/202112290916/78c2f31154c7f707a136a46409066524/part/0/960113/KGTX/CLTX001/b79bdab4e1aaf690d61e98a5094286c6.mp3"></audio>
 
     <el-dialog
       v-model="dialogVisible"
@@ -137,7 +129,7 @@ export default {
   margin-top: 10px;
   padding: 12px;
   width: 100%;
-  height: 300px;
+  height: 350px;
   border-radius: 5px;
   box-sizing: border-box;
   background: #ecf5ff;

@@ -1,18 +1,22 @@
 <template>
-  <el-row :gutter="16" class="login">
-    <el-col :span="22">
-      <el-input style="margin-bottom: 16px" v-model="address" placeholder="Set your address" />
-    </el-col>
-    <el-col :span="2">
-      <el-button type="primary" @click="login">Login</el-button>
-    </el-col>
-  </el-row>
-  <p class="token">{{ `current token: ${token}` }}</p>
-  
-  <el-row :gutter="16">
-    <el-col :span="8"><steal-fruit :token="token"/></el-col>
-    <el-col :span="8"><buy-water :token="token"/></el-col>
-  </el-row>
+<el-row justify="center">
+  <el-col :span="24" :md="16" :xl="12">
+    <el-row :gutter="16" class="login">
+      <el-col :span="18" :sm="20">
+        <el-input style="margin-bottom: 16px" v-model="address" placeholder="Set your address" />
+      </el-col>
+      <el-col :span="6" :sm="4">
+        <el-button type="primary" @click="login">Login</el-button>
+      </el-col>
+    </el-row>
+    <p class="token">{{ `current token: ${token}` }}</p>
+    
+    <el-row :gutter="16" class="tools">
+      <el-col :span="24" :sm="12"><steal-fruit :token="token"/></el-col>
+      <el-col :span="24" :sm="12"><buy-water :token="token"/></el-col>
+    </el-row>
+  </el-col>
+</el-row>
   
 </template>
 
@@ -101,5 +105,16 @@ export default {
 .token {
   font-size: 12px;
   color: #aaa;
+  word-wrap: break-word;
+  position: relative;
+  top: -20px;
+}
+
+.tools > * {
+  margin-bottom: 16px;
+}
+
+.tools > *:last-child {
+  margin-bottom: 0;
 }
 </style>
