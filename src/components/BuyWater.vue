@@ -6,22 +6,22 @@
       </div>
     </template>
     <el-row :gutter="10">
-      <el-col :span="16">
+      <el-col :span="14">
         <el-input-number
           v-model="num"
           :min="1"
           controls-position="right"
         />
       </el-col>
-      <el-col :span="8">
+      <el-col :span="10">
         <el-button @click="listenWaterStore">Listen</el-button>
       </el-col>
     </el-row>
 
-    <div class="logs" ref="logs">
+    <!-- <div class="logs" ref="logs">
       <p v-for="log in logs" :key="log">{{ log }}</p>
       <p style="margin-bottom: 12px">{{ `Total: ${logs.length - 1}` }}</p>
-    </div>
+    </div> -->
 
     <audio ref="music" src="https://webfs.ali.kugou.com/202112290916/78c2f31154c7f707a136a46409066524/part/0/960113/KGTX/CLTX001/b79bdab4e1aaf690d61e98a5094286c6.mp3"></audio>
 
@@ -55,8 +55,7 @@ export default {
   data() {
     return {
       num: 0,//水数量
-      second: 1,//请求间隔时间
-      logs: ['"messages" :'],
+      second: 3,//请求间隔时间
       timer: null,
       gCode: 0,
       dialogVisible: false,
@@ -73,13 +72,11 @@ export default {
           if (res.data.code != 200) {
             let msg = 'Token已过期！';
             console.warn(msg);
-            this.pushMessage(msg);
             return;
           }
           let water = res.data.data[1];
           let msg = `商店有 ${water.stock}L 水.`
           console.log(msg);
-          this.pushMessage(msg);
           if (water.stock != 0) {
             this.num = (water.stock < this.num) ? water.stock : this.num;
             this.openDialog();
@@ -96,7 +93,7 @@ export default {
         }
       }).then(res => {
         console.log(res);
-        this.pushMessage(res.data.data.msg);
+        // this.pushMessage(res.data.data.msg);
       })
     },
 
@@ -111,11 +108,6 @@ export default {
       this.dialogVisible = false;
       clearInterval(this.timer);
     },
-
-    pushMessage: function(msg) {
-      this.logs.push(msg);
-      this.$refs.logs.scrollTop = this.$refs.logs.scrollHeight;
-    },
   },
 }
 </script>
@@ -123,24 +115,5 @@ export default {
 <style scoped>
 .el-input-number, .el-button {
   width: 100%;
-}
-
-.logs {
-  margin-top: 10px;
-  padding: 12px;
-  width: 100%;
-  height: 350px;
-  border-radius: 5px;
-  box-sizing: border-box;
-  background: #ecf5ff;
-  overflow-y: auto;
-}
-
-.logs > p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 21px;
-  color: #888;
-  font-weight: 100;
 }
 </style>

@@ -7,36 +7,32 @@
       </div>
     </template>
     <el-row :gutter="10" class="form">
-      <el-col :span="16">
+      <el-col :span="14">
         <el-select v-model="landValue" placeholder="选择土地类型">
           <el-option label="黑土地" value="3"></el-option>
           <el-option label="红土地" value="2"></el-option>
           <el-option label="黄土地" value="1"></el-option>
         </el-select>
       </el-col>
-      <el-col :span="8">
+      <el-col :span="10">
         <el-button @click="stealByUserId">Start steal</el-button>
       </el-col>
     </el-row>
 
     <el-row class="form" :gutter="10" style="margin-top: 10px">
-      <el-col :span="16">
+      <el-col :span="14">
         <el-input-number v-model="customId" :min="1" controls-position="right"></el-input-number>
       </el-col>
-      <el-col :span="8">
+      <el-col :span="10">
         <el-button @click="stealByCostomId">Steal by id</el-button>
       </el-col>
     </el-row>
-    
-    <div class="logs" ref="logs">
-      <p v-for="log in logs" :key="log">{{ log }}</p>
-      <p style="margin-bottom: 12px">{{ `Total: ${logs.length - 1}` }}</p>
-    </div>
   </el-card>
 </template>
 
 <script>
 import axios from "axios"
+import { ElNotification } from 'element-plus'
 
 export default {
   props: [
@@ -51,13 +47,13 @@ export default {
   },
   methods: {
     stealByCostomId: function() {//根据自定义ID偷取
+      let tag = false;
       this.getIslandByUserId(this.customId, landList => {
         for (let j = 0; j < landList.length; j++) {
           if (landList[j].status == 'pick') {
             if (landList[j].factoryId == this.landValue) {
               let msg = `${this.customId}号岛屿的第${j+1}块地有${landList[j].stolenNum}个果实可偷取。`;
               console.log(msg);
-              this.pushMessage(msg);
               this.steal(landList[j].id);//偷取果实
             }
           } else {
@@ -65,9 +61,20 @@ export default {
           }
         }
       });
+      if (!tag) {
+        ElNotification({
+          message: '本次未偷取到果实。',
+          type: 'info',
+        });
+      }
     },
 
     stealByUserId: function() {//根据好友列表ID偷取
+      ElNotification({
+        message: '发送请求中，请勿重复操作...',
+        type: 'warning',
+      });
+      let tag = false;
       this.getUserList(userList => {
         for (let i = 0; i < userList.length; i++) {
           let id = userList[i].id;
@@ -77,7 +84,6 @@ export default {
                 if (landList[j].factoryId == this.landValue) {
                   let msg = `${id}号岛屿的第${j+1}块地有${landList[j].stolenNum}个果实可偷取。`;
                   console.log(msg);
-                  this.pushMessage(msg);
                   this.steal(landList[j].id);//偷取果实
                 }
               } else {
@@ -86,10 +92,20 @@ export default {
             }
           });
         }
+        if (!tag) {
+          ElNotification({
+            message: '本次未偷取到果实。',
+            type: 'info',
+          });
+        }
       });
     },
 
     outputWorkTime: function() {//打印土地worktime
+      ElNotification({
+        message: '发送请求中，请勿重复操作...',
+        type: 'warning',
+      });
       this.getUserList(userList => {
         for (let i = 0; i < userList.length; i++) {
           let id = userList[i].id;
@@ -101,6 +117,10 @@ export default {
             }
           });
         }
+        ElNotification({
+          message: 'Work time 输出成功。',
+          type: 'success',
+        });
       });
     },
 
@@ -113,7 +133,6 @@ export default {
         if (res.data.code != 200) {
           let msg = 'Token已过期！';
           console.warn(msg);
-          this.pushMessage(msg);
           return;
         }
         let num = res.data.data.totalElements;
@@ -137,7 +156,6 @@ export default {
         if (res.data.code != 200) {
           let msg = 'Token已过期！';
           console.warn(msg);
-          this.pushMessage(msg);
           return;
         }
         let data = res.data.data;
@@ -161,19 +179,16 @@ export default {
         }).then(res => {
           if (res.data.code == 200){
             let temData = Math.floor(res.data.data * 100) / 100;
-            let msg = `你成功盗取了${temData}个果实`;
+            let msg = `成功盗取了${temData}个果实`;
             console.log(msg);
-            this.pushMessage(msg);
+            ElNotification({
+              message: msg,
+              type: 'success',
+            });
           } else {
             console.log(res.data.msg);
-            this.pushMessage(res.data.msg);
           }
         });
-    },
-
-    pushMessage: function(msg) {//显示消息
-      this.logs.push(msg);
-      this.$refs.logs.scrollTop = this.$refs.logs.scrollHeight;
     },
   }
 }
@@ -193,24 +208,5 @@ export default {
 
 .form > .el-col > * {
    width: 100%;
-}
-
-.logs {
-  margin-top: 10px;
-  padding: 12px;
-  width: 100%;
-  height: 300px;
-  border-radius: 5px;
-  box-sizing: border-box;
-  background: #ecf5ff;
-  overflow-y: auto;
-}
-
-.logs > p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 21px;
-  color: #888;
-  font-weight: 100;
 }
 </style>
