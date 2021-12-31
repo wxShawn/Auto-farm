@@ -1,19 +1,20 @@
 <template>
 <el-row justify="center">
-  <el-col :span="24" :md="16" :xl="12">
+  <el-col :span="24" :sm="13" :md="12" :lg="12" :xl="7">
     <el-row :gutter="16" class="login">
-      <el-col :span="18" :sm="20">
+      <el-col :span="18">
         <el-input style="margin-bottom: 16px" v-model="address" placeholder="Set your address" />
       </el-col>
-      <el-col :span="6" :sm="4">
+      <el-col :span="6">
         <el-button type="primary" @click="login">Login</el-button>
       </el-col>
     </el-row>
     <p class="token">{{ `current token: ${token}` }}</p>
     
     <el-row :gutter="16" class="tools">
-      <el-col :span="24" :sm="12"><steal-fruit :token="token"/></el-col>
-      <el-col :span="24" :sm="12"><buy-water :token="token"/></el-col>
+      <el-col :span="24"><steal-fruit :token="token"/></el-col>
+      <el-col :span="24"><buy-water :token="token"/></el-col>
+      <el-col :span="24"><factory-info :token="token" /></el-col>
     </el-row>
   </el-col>
 </el-row>
@@ -22,15 +23,17 @@
 
 <script>
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 import StealFruit from './components/StealFruit.vue'
 import BuyWater from './components/BuyWater.vue'
-import { ElMessage } from 'element-plus'
+import FactoryInfo from './components/FactoryInfo.vue'
 
 export default {
   name: 'App',
   components: {
     StealFruit,
     BuyWater,
+    FactoryInfo,
   },
   data() {
     return {
