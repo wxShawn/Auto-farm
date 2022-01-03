@@ -10,10 +10,7 @@ export const Ax = {
     }).then(res => {
       if (res.data.code != 200) {
         console.warn(res.data.msg);
-        ElNotification({
-          message: res.data.msg,
-          type: 'warning',
-        });
+        Cation.warn(res.data.msg);
         return;
       }
       callBack(res);
@@ -27,14 +24,41 @@ export const Ax = {
       }
     }).then(res => {
       if (res.data.code != 200) {
-        console.warn(res);
-        ElNotification({
-          message: res.data.msg,
-          type: 'warning',
-        });
+        console.warn(res.data.msg);
+        Cation.warn(res.data.msg);
         return;
       }
       callBack(res);
+    });
+  }
+}
+
+export const Cation = {
+  info: function(msg) {
+    ElNotification({
+      message: msg,
+      type: 'info',
+    });
+  },
+
+  success: function(msg) {
+    ElNotification({
+      message: msg,
+      type: 'success',
+    });
+  },
+
+  warn: function(msg) {
+    ElNotification({
+      message: msg,
+      type: 'warning',
+    });
+  },
+
+  erro: function(msg) {
+    ElNotification({
+      message: msg,
+      type: 'erro',
     });
   }
 }
