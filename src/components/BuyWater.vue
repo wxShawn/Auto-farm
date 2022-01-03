@@ -6,35 +6,33 @@
       </div>
     </template>
     <el-row :gutter="10">
-      <el-col :span="14">
+      <el-col :span="10">
         <el-input-number
           v-model="num"
           :min="1"
           controls-position="right"
         />
       </el-col>
-      <el-col :span="10">
+      <el-col :span="7">
+        <el-button @click="stopListen">Stop</el-button>
+      </el-col>
+      <el-col :span="7">
         <el-button @click="listenWaterStore">Listen</el-button>
       </el-col>
     </el-row>
 
-    <!-- <div class="logs" ref="logs">
-      <p v-for="log in logs" :key="log">{{ log }}</p>
-      <p style="margin-bottom: 12px">{{ `Total: ${logs.length - 1}` }}</p>
-    </div> -->
-
-    <audio ref="music" src="https://webfs.ali.kugou.com/202112290916/78c2f31154c7f707a136a46409066524/part/0/960113/KGTX/CLTX001/b79bdab4e1aaf690d61e98a5094286c6.mp3"></audio>
+    <audio ref="music" src="/caocao.mp3"></audio>
 
     <el-dialog
       v-model="dialogVisible"
       title="水来了"
       width="300px"
     >
-      <el-input v-model="gCode" type="number" placeholder="请输入验证码" />
+      <el-input v-model="gCode" type="number" placeholder="请输入验证码" @keyup.enter="buyWater" />
       <template #footer>
         <el-row :gutter="10">
           <el-col :span="12">
-            <el-button @click="dialogVisible = false">取消</el-button>
+            <el-button @click="closeDialog">取消</el-button>
           </el-col>
           <el-col :span="12">
             <el-button type="primary" @click="buyWater">购买</el-button>
@@ -85,6 +83,11 @@ export default {
       }, this.second * 1000);
     },
 
+    stopListen: function() {//停止监听
+      clearInterval(this.timer);
+      console.log('监听已停止');
+    },
+
     buyWater: function() {//买水
       this.closeDialog();
       axios.post(`https://gas.mtvs.tv/api/app/record/product?type=buy&productId=2&productNum=${this.num}&code=${this.gCode}`, {}, {
@@ -92,12 +95,13 @@ export default {
           'token': this.token,
         }
       }).then(res => {
-        console.log(res);
+        console.log(res.data);
         // this.pushMessage(res.data.data.msg);
       })
     },
 
     openDialog: function() {//打开购买窗口
+      clearInterval(this.timer);
       this.$refs.music.play();
       this.dialogVisible = true;
     },
@@ -106,7 +110,6 @@ export default {
       this.$refs.music.pause();
       this.$refs.music.load();
       this.dialogVisible = false;
-      clearInterval(this.timer);
     },
   },
 }
