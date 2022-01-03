@@ -15,13 +15,13 @@
       <el-table-column fixed="right" label="操作" width="170">
         <template #default="f">
           <span v-if="f.row.land">
-            <el-button type="text">播种</el-button>
+            <el-button type="text" @click="work(f.row.id)">播种</el-button>
             <el-button type="text" @click="water">浇水</el-button>
             <el-button type="text" @click="fertilize">施肥</el-button>
             <el-button type="text" @click="pick(f.row.id)">收获</el-button>
           </span>
           <span v-else>
-            <el-button type="text">生产</el-button>
+            <el-button type="text" @click="work(f.row.id)">生产</el-button>
             <el-button type="text" @click="pick(f.row.id)">收获</el-button>
           </span>
         </template>
@@ -45,9 +45,19 @@ export default {
     }
   },
   methods: {
-    pick: function(id) {//收获（未测试）
+    pick: function(id) {//收获
       Ax.post(`https://gas.mtvs.tv/api/app/record/factory/pick?memberFactoryId=${id}`, this.token, res => {
         console.log(`收获${res.data.data}`);
+        ElNotification({
+          message: res.data.msg,
+          type: 'info',
+        });
+      });
+    },
+
+    work: function(id) {//生产/播种
+      Ax.post(`https://gas.mtvs.tv/api/app/record/factory/work?memberFactoryId=${id}`, this.token, res => {
+        console.log(res.data.msg);
         ElNotification({
           message: res.data.msg,
           type: 'info',
@@ -71,7 +81,7 @@ export default {
           let f = {};
           f.id = list[i].id;
           f.status = list[i].status;
-          let d = new Date(list[i].pickTime);
+          let d = new Date(list[i].workTime);
           f.pickTime = `${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
           switch (list[i].factoryId) {
             case 1:
@@ -119,72 +129,6 @@ export default {
         this.factoryList = fList;
       })
     },
-
-    // getFactInfo: function() {//获取已登录岛屿信息
-    //   axios.get('https://gas.mtvs.tv/api/app/member/factory', {
-    //     headers: {
-    //       'token': this.token,
-    //     }
-    //   }).then(res => {
-    //     if (res.data.code != 200) {
-    //       let msg = 'Token已过期！';
-    //       console.warn(msg);
-    //       return;
-    //     }
-    //     let list = res.data.data;
-    //     let fList = [];
-    //     for (let i = 0; i < list.length; i++) {
-    //       let f = {};
-    //       f.id = list[i].id;
-    //       f.status = list[i].status;
-    //       let d = new Date(list[i].pickTime);
-    //       f.pickTime = `${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
-    //       switch (list[i].factoryId) {
-    //         case 1:
-    //           f.type = '黄土地';
-    //           f.land = true;
-    //           break;
-    //         case 2:
-    //           f.type = '红土地';
-    //           f.land = true;
-    //           break;
-    //         case 3:
-    //           f.type = '黑土地';
-    //           f.land = true;
-    //           break;
-    //         case 4:
-    //           f.type = '一级水厂';
-    //           f.land = false;
-    //           break;
-    //         case 5:
-    //           f.type = '二级水厂';
-    //           f.land = false;
-    //           break;
-    //         case 6:
-    //           f.type = '三级水厂';
-    //           f.land = false;
-    //           break;
-    //         case 7:
-    //           f.type = '一级化肥厂';
-    //           f.land = false;
-    //           break;
-    //         case 8:
-    //           f.type = '二级化肥厂';
-    //           f.land = false;
-    //           break;
-    //         case 9:
-    //           f.type = '三级化肥厂';
-    //           f.land = false;
-    //           break;
-    //         default:
-    //           break;
-    //       }
-    //       fList.push(f);
-    //     }
-    //     console.log(fList);
-    //     this.factoryList = fList;
-    //   });
-    // },
   },
 }
 </script>
