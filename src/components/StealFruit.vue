@@ -6,33 +6,42 @@
         <el-button type="text" @click="outputWorkTime">Output</el-button>
       </div>
     </template>
-    <el-row :gutter="10" class="form">
-      <el-col :span="14">
-        <el-select v-model="landValue" placeholder="选择土地类型">
+    <el-form
+      label-position="left"
+      label-width="120px"
+    >
+      <el-form-item label="土地类型">
+        <el-select v-model="stealLandValue" placeholder="选择土地类型">
           <el-option label="黑土地" value="3"></el-option>
           <el-option label="红土地" value="2"></el-option>
           <el-option label="黄土地" value="1"></el-option>
         </el-select>
-      </el-col>
-      <el-col :span="10">
-        <el-button @click="stealByUserId">Start steal</el-button>
-      </el-col>
-    </el-row>
-
-    <el-row class="form" :gutter="10" style="margin-top: 10px">
-      <el-col :span="14">
-        <el-input-number v-model="customId" :min="1" controls-position="right"></el-input-number>
-      </el-col>
-      <el-col :span="10">
-        <el-button @click="stealByCostomId">Steal by id</el-button>
-      </el-col>
-    </el-row>
+      </el-form-item>
+      <el-form-item label="目标用户ID">
+        <el-input-number v-model="stealId" :min="1" controls-position="right"></el-input-number>
+      </el-form-item>
+      <el-form-item>
+      <el-button type="primary" @click="addPlan">添加</el-button>
+    </el-form-item>
+    </el-form>
+    <el-table :data="stealPlanList" style="width: 100%">
+      <el-table-column prop="id" label="ID" width="80"/>
+      <el-table-column prop="landId" label="土地ID" width="80" />
+      <el-table-column prop="landType" label="类型" />
+      <el-table-column prop="pickTime" label="收获时间" />
+      <el-table-column fixed="right" label="操作" width="120">
+        <template #default="s">
+          <el-button type="text" @click="steal(s.row.landId)">偷取</el-button>
+          <el-button type="text" @click="delPlan(s.$index)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
   </el-card>
 </template>
 
 <script>
-import axios from "axios"
-import { ElNotification } from 'element-plus'
+import { Ax } from "../scripts/common.js"
+import { Cation } from '../scripts/common.js'
 
 export default {
   props: [
@@ -40,156 +49,107 @@ export default {
   ],
   data() {
     return {
-      landValue: '3',
-      logs: ['"messages" :'],
-      customId: 1,
+      stealId: 1,
+      stealLandValue: '3',
+      stealPlanList: [],//计划列表
     }
   },
   methods: {
-    stealByCostomId: function() {//根据自定义ID偷取
-      let tag = false;
-      this.getIslandByUserId(this.customId, landList => {
-        for (let j = 0; j < landList.length; j++) {
-          if (landList[j].status == 'pick') {
-            if (landList[j].factoryId == this.landValue) {
-              let msg = `${this.customId}号岛屿的第${j+1}块地有${landList[j].stolenNum}个果实可偷取。`;
-              console.log(msg);
-              this.steal(landList[j].id);//偷取果实
-            }
-          } else {
-            console.log('果实未成熟。')
+    addPlan: function() {//添加计划
+      if (this.stealPlanList.length != 0) {
+        for (let i = 0; i < this.stealPlanList.length; i++) {
+          if (this.stealPlanList[i].id == this.stealId && this.stealPlanList[i].landValue == this.stealLandValue) {
+            console.warn('该计划已存在！');
+            Cation.warn('该计划已存在！');
+            return false;
           }
         }
-      });
-      if (!tag) {
-        ElNotification({
-          message: '本次未偷取到果实。',
-          type: 'info',
-        });
       }
+      this.getIslandByUserId(this.stealId, landList => {
+        let flag = false;
+        for (let j = 0; j < landList.length; j++) {
+          let land = landList[j];
+          if (land.factoryId == this.stealLandValue) {
+            this.stealPlanList.push({
+              id: land.memberId,
+              landId: land.id,
+              landValue: land.factoryId,
+              landType: land.factoryId == 1 ? '黄土地' : (land.factoryId == 2 ? '红土地' : '黑土地'),
+              pickTime: `${new Date(land.workTime).getHours()}:${new Date(land.workTime).getMinutes()}:${new Date(land.workTime).getSeconds()}`
+            });
+            flag = true;
+          }
+        }
+        if (flag) {
+          console.log('添加成功');
+          Cation.success('添加成功');
+        } else {
+          let msg = `该岛屿没有${this.stealLandValue == 1 ? '黄土地' : (this.stealLandValue == 2 ? '红土地' : '黑土地')}`;
+          console.log(msg);
+          Cation.info(msg)
+        }
+      });
     },
 
-    stealByUserId: function() {//根据好友列表ID偷取
-      ElNotification({
-        message: '发送请求中，请勿重复操作...',
-        type: 'warning',
-      });
-      let tag = false;
-      this.getUserList(userList => {
-        for (let i = 0; i < userList.length; i++) {
-          let id = userList[i].id;
-          this.getIslandByUserId(id, landList => {
-            for (let j = 0; j < landList.length; j++) {
-              if (landList[j].status == 'pick') {
-                if (landList[j].factoryId == this.landValue) {
-                  let msg = `${id}号岛屿的第${j+1}块地有${landList[j].stolenNum}个果实可偷取。`;
-                  console.log(msg);
-                  this.steal(landList[j].id);//偷取果实
-                }
-              } else {
-                console.log('果实未成熟。')
-              }
-            }
-          });
-        }
-        if (!tag) {
-          ElNotification({
-            message: '本次未偷取到果实。',
-            type: 'info',
-          });
-        }
-      });
+    delPlan: function(i) {
+      this.stealPlanList.splice(i, 1);
+      console.log(this.stealPlanList)
     },
 
     outputWorkTime: function() {//打印土地worktime
-      ElNotification({
-        message: '发送请求中，请勿重复操作...',
-        type: 'warning',
-      });
+      console.log('发送请求中！');
+      Cation.info('发送请求中！');
       this.getUserList(userList => {
         for (let i = 0; i < userList.length; i++) {
           let id = userList[i].id;
           this.getIslandByUserId(id, landList => {
             for (let j = 0; j < landList.length; j++) {
-              if (landList[j].factoryId == this.landValue) {
+              if (landList[j].factoryId == this.stealLandValue) {
                 console.log(`${landList[j].memberId}>${new Date(landList[j].workTime)}`);
               }
             }
           });
         }
-        ElNotification({
-          message: 'Work time 输出成功。',
-          type: 'success',
-        });
+        console.log('等待服务器响应，这可能需要较长时间，请勿进行其他操作...');
+        Cation.info('等待服务器响应，这可能需要较长时间，请勿进行其他操作...');
       });
     },
 
-    getUserList: function(callback) {//获取用户列表
-      axios.get(`https://gas.mtvs.tv/api/app/member/friend?size=1&page=0`, {
-        headers: {
-          'token': this.token,
-        }
-      }).then(res => {
-        if (res.data.code != 200) {
-          let msg = 'Token已过期！';
-          console.warn(msg);
-          return;
-        }
+    getUserList: function(callBack) {//获取用户列表
+      Ax.get('https://gas.mtvs.tv/api/app/member/friend?size=1&page=0', this.token, res => {
         let num = res.data.data.totalElements;
-        axios.get(`https://gas.mtvs.tv/api/app/member/friend?size=${num}&page=0`, {
-          headers: {
-            'token': this.token,
-          }
-        }).then(res => {
+        Ax.get(`https://gas.mtvs.tv/api/app/member/friend?size=${num}&page=0`, this.token, res => {
           let idList = res.data.data.content;
-          callback(idList);
-        });
+          callBack(idList);
+        })
       });
     },
 
-    getIslandByUserId: function(id, callback) {//根据用户ID获取岛屿信息
-      axios.get(`https://gas.mtvs.tv/api/app/member/factory?memberId=${id}`, {
-        headers: {
-          'token': this.token,
-        }
-      }).then(res => {
-        if (res.data.code != 200) {
-          let msg = 'Token已过期！';
-          console.warn(msg);
-          return;
-        }
+    getIslandByUserId: function(id, callBack) {//根据用户ID获取岛屿信息
+      Ax.get(`https://gas.mtvs.tv/api/app/member/factory?memberId=${id}`, this.token, res => {
         let data = res.data.data;
         if (data) {
           if (data.length == 0) {
             console.log('Island is empty');
+            Cation.info('Island is empty');
           } else {
-            callback(data);
+            callBack(data);
           }
         } else {
           console.log('Island is not found!');
+          Cation.info('Island is not found!');
         }
-      });
+      })
     },
 
-    steal: function(id) {//根据土地ID偷取果实
-      axios.post(`https://gas.mtvs.tv/api/app/record/factory/steal?memberFactoryId=${id}`,{},{
-          headers: {
-            'token': this.token,
-          }
-        }).then(res => {
-          if (res.data.code == 200){
-            let temData = Math.floor(res.data.data * 100) / 100;
-            let msg = `成功盗取了${temData}个果实`;
-            console.log(msg);
-            ElNotification({
-              message: msg,
-              type: 'success',
-            });
-          } else {
-            console.log(res.data.msg);
-          }
-        });
-    },
+    steal: function(id) {//根据factoryId偷取
+      Ax.post(`https://gas.mtvs.tv/api/app/record/factory/steal?memberFactoryId=${id}`, this.token, res => {
+        let temData = Math.floor(res.data.data * 100) / 100;
+        let msg = `成功盗取了${temData}个果实`;
+        console.log(msg);
+        Cation.success(msg)
+      })
+    }
   }
 }
 </script>
