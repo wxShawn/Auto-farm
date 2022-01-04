@@ -16,8 +16,8 @@
         <template #default="f">
           <span v-if="f.row.land">
             <el-button type="text" @click="work(f.row.id)">播种</el-button>
-            <el-button type="text" @click="water">浇水</el-button>
-            <el-button type="text" @click="fertilize">施肥</el-button>
+            <el-button type="text" @click="work(f.row.id)">浇水</el-button>
+            <el-button type="text" @click="work(f.row.id)">施肥</el-button>
             <el-button type="text" @click="pick(f.row.id)">收获</el-button>
           </span>
           <span v-else>
@@ -31,9 +31,8 @@
 </template>
 
 <script>
-// import axios from 'axios'
 import { Ax } from '../scripts/common.js'
-import { ElNotification } from 'element-plus'
+import { Cation } from '../scripts/common.js'
 
 export default {
   props: [
@@ -48,29 +47,15 @@ export default {
     pick: function(id) {//收获
       Ax.post(`https://gas.mtvs.tv/api/app/record/factory/pick?memberFactoryId=${id}`, this.token, res => {
         console.log(`收获${res.data.data}`);
-        ElNotification({
-          message: res.data.msg,
-          type: 'info',
-        });
+        Cation.success(res.data.msg)
       });
     },
 
-    work: function(id) {//生产/播种
+    work: function(id) {//生产/播种/施肥/收获
       Ax.post(`https://gas.mtvs.tv/api/app/record/factory/work?memberFactoryId=${id}`, this.token, res => {
         console.log(res.data.msg);
-        ElNotification({
-          message: res.data.msg,
-          type: 'info',
-        });
+        Cation.success(res.data.msg);
       });
-    },
-
-    water: function() {//浇水
-      console.log('浇水')
-    },
-
-    fertilize: function() {//施肥
-      console.log('施肥')
     },
 
     getFactInfo: function() {//获取已登录岛屿信息
@@ -125,15 +110,16 @@ export default {
           }
           fList.push(f);
         }
-        console.log(fList);
         this.factoryList = fList;
+        console.log('factory info 加载成功');
+        Cation.success('factory info 加载成功');
       })
     },
   },
 }
 </script>
 
-<style>
+<style scoped>
 .card-header {
   display: flex;
   justify-content: space-between;
