@@ -119,8 +119,10 @@ export default {
             if (row.status == 'pick') {
               this.stealByLandId(row.landId);
             } else if (status == 'rest') {
+              console.log(`土地${row.landId}闲置中`);
               Cation.info(`土地${row.landId}闲置中`);
             } else {
+              console.log(`土地${row.landId}果实未成熟`);
               Cation.info(`土地${row.landId}果实未成熟`);
             }
           } 
