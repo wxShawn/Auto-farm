@@ -21,7 +21,7 @@
       </el-col>
     </el-row>
 
-    <audio ref="music" src="/caocao.mp3"></audio>
+    <audio ref="music" src="https://wxshawn.github.io/Media-Lib/audios/caocao.mp3"></audio>
 
     <el-dialog
       v-model="dialogVisible"
