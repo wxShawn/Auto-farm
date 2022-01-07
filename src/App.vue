@@ -13,9 +13,9 @@
     
     <el-row :gutter="16" class="tools">
       <el-col :span="24" :lg="12"><user-info :token="token" /></el-col>
-      <el-col :span="24" :lg="12"><steal-fruit :token="token"/></el-col>
-      <el-col :span="24" :lg="12"><factory-info :token="token" /></el-col>
-      <el-col :span="24" :lg="12"><buy-water :token="token"/></el-col>
+      <el-col :span="24" :lg="12"><buy-water :token="token" style="height: 282px"/></el-col>
+      <el-col :span="24" :lg="12"><factory-info :token="token" style="height: 600px"/></el-col>
+      <el-col :span="24" :lg="12"><steal-fruit :token="token" style="height: 600px"/></el-col>
     </el-row>
   </el-col>
 </el-row>

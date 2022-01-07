@@ -25,7 +25,7 @@
         <el-button @click="reloadPlan">刷新</el-button>
       </el-form-item>
     </el-form>
-    <el-table :data="stealPlanList" style="width: 100%">
+    <el-table :data="stealPlanList" style="width: 100%" max-height="300">
       <el-table-column prop="id" label="ID" width="80"/>
       <el-table-column prop="landId" label="土地ID" width="80" />
       <el-table-column prop="landType" label="类型" />

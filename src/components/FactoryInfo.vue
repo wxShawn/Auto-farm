@@ -7,7 +7,7 @@
       </div>
     </template>
     
-    <el-table :data="factoryList" style="width: 100%">
+    <el-table :data="factoryList" style="width: 100%" max-height="490">
       <el-table-column prop="id" label="ID" width="80"/>
       <el-table-column prop="type" label="类型" />
       <el-table-column prop="status" label="状态" />
